@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include vipey/templates *
+recursive-exclude vipey/templates *.pyc
+recursive-exclude vipey/templates __pycache__

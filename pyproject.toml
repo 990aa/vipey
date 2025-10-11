@@ -1,0 +1,25 @@
+[project]
+name = "vipey"
+version = "0.1.0"
+description = "A Python visualization tool for algorithm execution with interactive frontend"
+authors = [
+    {name = "Abdul Ahad",email = "099ahadabdul@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+]
+
+[tool.poetry]
+packages = [{include = "vipey"}]
+include = ["vipey/templates/**/*"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
