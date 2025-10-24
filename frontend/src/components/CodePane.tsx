@@ -19,25 +19,28 @@ export const CodePane: React.FC<CodePaneProps> = ({ code, highlightLine }) => {
         
         // Basic Python syntax highlighting
         let coloredLine = line
-          .replace(/\b(def|class|if|else|elif|for|while|return|import|from|as|try|except|finally|with|pass|break|continue|yield|async|await)\b/g, '<span style="color: #C678DD">$1</span>')
-          .replace(/\b(True|False|None|self)\b/g, '<span style="color: #D19A66">$1</span>')
-          .replace(/(#.*$)/g, '<span style="color: #5C6370">$1</span>')
-          .replace(/"([^"]*)"/g, '<span style="color: #98C379">"$1"</span>')
-          .replace(/'([^']*)'/g, '<span style="color: #98C379">\'$1\'</span>')
-          .replace(/\b(\d+)\b/g, '<span style="color: #D19A66">$1</span>');
+          .replace(/\b(def|class|if|else|elif|for|while|return|import|from|as|try|except|finally|with|pass|break|continue|yield|async|await)\b/g, '<span style="color: #1565c0">$1</span>')
+          .replace(/\b(True|False|None|self)\b/g, '<span style="color: #1976d2">$1</span>')
+          .replace(/(#.*$)/g, '<span style="color: #5c6bc0">$1</span>')
+          .replace(/"([^"]*)"/g, '<span style="color: #388e3c">"$1"</span>')
+          .replace(/'([^']*)'/g, '<span style="color: #388e3c">\'$1\'</span>')
+          .replace(/\b(\d+)\b/g, '<span style="color: #1976d2">$1</span>');
 
         return `
           <div style="
             display: flex;
-            ${isHighlighted ? 'background: rgba(255, 215, 0, 0.15); border-left: 3px solid #ffd700;' : ''}
-            padding: 0 10px;
+            ${isHighlighted ? 'background: rgba(30, 136, 229, 0.3); border-left: 4px solid #1e88e5; transform: translateX(2px);' : ''}
+            padding: 4px 10px;
+            transition: all 0.3s ease;
+            margin: 2px 0;
           ">
             <span style="
-              color: #5C6370;
+              color: #5c6bc0;
               min-width: 40px;
               text-align: right;
               padding-right: 20px;
               user-select: none;
+              font-weight: ${isHighlighted ? 'bold' : 'normal'};
             ">${lineNumber}</span>
             <span style="flex: 1; white-space: pre;">${coloredLine || ' '}</span>
           </div>
@@ -45,15 +48,23 @@ export const CodePane: React.FC<CodePaneProps> = ({ code, highlightLine }) => {
       }).join('');
       
       codeRef.current.innerHTML = highlighted;
+      
+      // Smooth scroll to highlighted line
+      if (highlightLine > 0) {
+        const highlightedElement = codeRef.current.children[highlightLine - 1] as HTMLElement;
+        if (highlightedElement) {
+          highlightedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
     }
   }, [code, highlightLine]);
 
   return (
     <div style={{ 
-      borderRadius: '6px', 
+      borderRadius: '8px', 
       overflow: 'auto',
-      border: '1px solid #30363d',
-      background: '#1e2127',
+      border: '1px solid #64b5f6',
+      background: '#e3f2fd',
       maxHeight: '600px'
     }}>
       <pre 
@@ -64,7 +75,7 @@ export const CodePane: React.FC<CodePaneProps> = ({ code, highlightLine }) => {
           fontSize: '14px',
           lineHeight: '1.6',
           fontFamily: "'Consolas', 'Monaco', 'Courier New', monospace",
-          color: '#ABB2BF'
+          color: '#1a237e'
         }}
       />
     </div>

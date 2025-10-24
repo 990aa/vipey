@@ -12,7 +12,7 @@ export const VisualizationPane: React.FC<VisualizationPaneProps> = ({ variable }
       <div style={{ 
         textAlign: 'center', 
         padding: '40px', 
-        color: '#8b949e',
+        color: '#1565c0',
         fontSize: '1.1em'
       }}>
         No variables to display
@@ -31,15 +31,17 @@ export const VisualizationPane: React.FC<VisualizationPaneProps> = ({ variable }
             key={key} 
             style={{ 
               marginBottom: '25px', 
-              background: '#161b22',
+              background: '#bbdefb',
               borderRadius: '8px',
               padding: '15px',
-              border: '1px solid #30363d'
+              border: '1px solid #64b5f6',
+              animation: 'fadeIn 0.3s ease',
+              transition: 'all 0.3s ease'
             }}
           >
             <h3 style={{ 
               margin: '0 0 15px 0',
-              color: '#58a6ff',
+              color: '#0d47a1',
               fontSize: '1.1em',
               display: 'flex',
               alignItems: 'center',
@@ -48,8 +50,8 @@ export const VisualizationPane: React.FC<VisualizationPaneProps> = ({ variable }
               <span>{key}</span>
               <span style={{ 
                 fontSize: '0.75em', 
-                color: '#8b949e',
-                background: '#0d1117',
+                color: '#1565c0',
+                background: '#e3f2fd',
                 padding: '4px 10px',
                 borderRadius: '12px',
                 fontWeight: 'normal'
@@ -61,13 +63,13 @@ export const VisualizationPane: React.FC<VisualizationPaneProps> = ({ variable }
               <ArrayVisualizer data={value} />
             ) : (
               <pre style={{ 
-                backgroundColor: '#0d1117', 
-                color: '#79c0ff',
+                backgroundColor: '#e3f2fd', 
+                color: '#0d47a1',
                 padding: '15px', 
                 borderRadius: '6px',
                 overflow: 'auto',
                 margin: 0,
-                border: '1px solid #30363d',
+                border: '1px solid #64b5f6',
                 fontSize: '0.95em',
                 lineHeight: '1.6'
               }}>
