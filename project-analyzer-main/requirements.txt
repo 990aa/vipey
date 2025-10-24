@@ -1,0 +1,55 @@
+# Core analysis
+pathlib
+humanize
+gitpython
+pydriller
+networkx
+matplotlib
+seaborn
+numpy
+scipy
+scikit-learn
+
+# Code analysis
+radon
+vulture
+bandit
+lizard
+javalang
+tree-sitter
+tree-sitter-python
+tree-sitter-javascript
+tree-sitter-java
+tree-sitter-go
+tree-sitter-rust
+
+# Dependency analysis
+pipdeptree
+safety
+packageurl-python
+
+# AI/ML capabilities
+openai
+transformers
+torch
+sentence-transformers
+nltk
+textstat
+
+# Visualization & APIs
+plotly
+flask
+flask-socketio
+simple-websocket
+
+# Security & crypto
+pycryptodome
+cryptography
+
+# Utilities
+pydantic
+pandas
+tqdm
+python-dotenv
+click
+rich
