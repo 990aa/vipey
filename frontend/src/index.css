@@ -174,23 +174,23 @@ code {
 }
 
 .info-item {
-  background: #0d1117;
+  background: #e3f2fd;
   padding: 15px 20px;
   border-radius: 8px;
-  border: 1px solid #30363d;
+  border: 1px solid #64b5f6;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .info-label {
-  color: #8b949e;
+  color: #1565c0;
   font-size: 0.9em;
   font-weight: 600;
 }
 
 .info-value {
-  color: #58a6ff;
+  color: #0d47a1;
   font-size: 1.5em;
   font-weight: bold;
 }
@@ -205,17 +205,17 @@ code {
 
 .code-section,
 .variables-section {
-  background: #0d1117;
+  background: #e3f2fd;
   padding: 20px;
   border-radius: 8px;
-  border: 1px solid #30363d;
+  border: 1px solid #64b5f6;
   overflow: auto;
   max-height: 600px;
 }
 
 .code-section h2,
 .variables-section h2 {
-  color: #58a6ff;
+  color: #0d47a1;
   margin-bottom: 15px;
   font-size: 1.4em;
 }
