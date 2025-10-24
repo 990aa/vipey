@@ -549,3 +549,210 @@ class ProjectAnalyzer:
             report.append("")
         
         return '\n'.join(report)
+    
+    def generate_advanced_report(self, analysis: Dict) -> str:
+        """Generate advanced analysis report with risk analysis and insights"""
+        report = []
+        
+        metrics = analysis['metrics']
+        files = analysis['files']
+        git = analysis.get('git_history', {})
+        
+        report.append("=" * 80)
+        report.append(">>>> ADVANCED ANALYSIS")
+        report.append("=" * 80)
+        report.append("")
+        
+        # Code Churn & Stability
+        if git and git.get('file_churn'):
+            report.append(">>>> CODE CHURN & STABILITY")
+            report.append("-" * 40)
+            
+            churn = git['file_churn']
+            sorted_churn = sorted(churn.items(), key=lambda x: x[1]['commits'], reverse=True)[:5]
+            
+            report.append("Most Modified Files:")
+            for file_path, stats in sorted_churn:
+                report.append(f"  {Path(file_path).name}: {stats['commits']} commits")
+            report.append("")
+        
+        return '\n'.join(report)
+    
+    def generate_nextgen_report(self, analysis: Dict) -> str:
+        """Generate next-generation analysis with predictive insights"""
+        report = []
+        files = analysis['files']
+        metrics = analysis['metrics']
+        git = analysis.get('git_history', {})
+        call_graph = analysis.get('call_graph', {})
+        dependencies = analysis.get('dependencies', {})
+        
+        report.append("=" * 80)
+        report.append(">>>> NEXT-GENERATION CODE INTELLIGENCE REPORT")
+        report.append("=" * 80)
+        report.append("")
+        
+        # Predictive Risk Analysis
+        report.append(">>>> PREDICTIVE RISK ANALYSIS")
+        report.append("-" * 40)
+        
+        # Calculate risk scores for files
+        file_risks = []
+        for f in files:
+            risk_score = self._calculate_file_risk(f, git)
+            file_risks.append((f['path'], risk_score))
+        
+        file_risks.sort(key=lambda x: x[1], reverse=True)
+        top_risks = file_risks[:5]
+        
+        if top_risks:
+            report.append("Top 5 High-Risk Files:")
+            for path, risk in top_risks:
+                report.append(f"  {path}: {risk*100:.1f}% risk")
+            avg_risk = sum(r for _, r in file_risks) / len(file_risks) if file_risks else 0
+            report.append(f"Average Project Risk: {avg_risk*100:.1f}%")
+        else:
+            report.append("No risk analysis data available")
+        report.append("")
+        
+        # Architectural Analysis
+        report.append(">>>>>> ARCHITECTURAL ANALYSIS")
+        report.append("-" * 40)
+        report.append(f"Call Graph Size: {call_graph.get('total_nodes', 0)} functions, {call_graph.get('total_edges', 0)} calls")
+        report.append(f"Architecture Density: {call_graph.get('density', 0):.3f}")
+        report.append("")
+        
+        # Dependency Ecosystem
+        report.append(">>>> DEPENDENCY ECOSYSTEM")
+        report.append("-" * 40)
+        report.append(f"Total Dependencies: {len(dependencies)}")
+        py_deps = [d for d in dependencies.values() if d.get('type') == 'python']
+        js_deps = [d for d in dependencies.values() if d.get('type') == 'nodejs']
+        report.append(f"Python Dependencies: {len(py_deps)}")
+        report.append(f"JavaScript Dependencies: {len(js_deps)}")
+        report.append("")
+        
+        # AI-Augmented Insights
+        report.append(">>>> AI-AUGMENTED INSIGHTS")
+        report.append("-" * 40)
+        report.append(f"Files with AI Summaries: 0")
+        report.append("")
+        
+        # Code Evolution DNA
+        report.append(">>>> CODE EVOLUTION DNA")
+        report.append("-" * 40)
+        stable_count, volatile_count = self._analyze_stability(files, git)
+        total_files = len(files)
+        stability_ratio = stable_count / total_files if total_files > 0 else 0
+        
+        report.append(f"Stable Files: {stable_count}")
+        report.append(f"Volatile Files: {volatile_count}")
+        report.append(f"Codebase Stability: {stability_ratio*100:.1f}%")
+        report.append("")
+        
+        # Recommendations
+        report.append(">>>> RECOMMENDATIONS & INSIGHTS")
+        report.append("-" * 40)
+        recommendations = self._generate_recommendations(file_risks, metrics, dependencies, call_graph)
+        for i, rec in enumerate(recommendations[:5], 1):
+            report.append(f"{i}. {rec}")
+        report.append("")
+        
+        return '\n'.join(report)
+    
+    def _calculate_file_risk(self, file_info: Dict, git_history: Dict) -> float:
+        """Calculate risk score for a file (0.0 to 1.0)"""
+        risk = 0.0
+        
+        # Complexity risk
+        complexity = file_info.get('complexity_score', 0)
+        if complexity > 50:
+            risk += 0.3
+        elif complexity > 20:
+            risk += 0.15
+        
+        # Low comment ratio risk
+        comment_ratio = file_info.get('comment_ratio', 0)
+        if comment_ratio < 0.1:
+            risk += 0.2
+        
+        # Git churn risk
+        if git_history and git_history.get('file_churn'):
+            file_path = file_info.get('absolute_path', file_info.get('path', ''))
+            churn = git_history['file_churn'].get(file_path, {})
+            commits = churn.get('commits', 0)
+            if commits > 10:
+                risk += 0.2
+            elif commits > 5:
+                risk += 0.1
+        
+        # Large file risk
+        lines = file_info.get('total_lines', 0)
+        if lines > 1000:
+            risk += 0.2
+        elif lines > 500:
+            risk += 0.1
+        
+        return min(risk, 1.0)  # Cap at 1.0
+    
+    def _analyze_stability(self, files: List[Dict], git_history: Dict) -> Tuple[int, int]:
+        """Analyze file stability based on git history"""
+        stable_count = 0
+        volatile_count = 0
+        
+        if not git_history or not git_history.get('file_churn'):
+            # If no git history, consider all files stable
+            return len(files), 0
+        
+        file_churn = git_history['file_churn']
+        
+        for f in files:
+            file_path = f.get('absolute_path', f.get('path', ''))
+            churn = file_churn.get(file_path, {})
+            commits = churn.get('commits', 0)
+            
+            if commits < 2:  # Less than 2 commits = stable
+                stable_count += 1
+            elif commits > 10:  # More than 10 commits = volatile
+                volatile_count += 1
+            else:
+                stable_count += 1  # Default to stable
+        
+        return stable_count, volatile_count
+    
+    def _generate_recommendations(self, file_risks: List[Tuple[str, float]], 
+                                 metrics: Dict, dependencies: Dict, 
+                                 call_graph: Dict) -> List[str]:
+        """Generate actionable recommendations"""
+        recommendations = []
+        
+        # Risk-based recommendations
+        high_risk_files = [f for f, r in file_risks if r > 0.5]
+        if len(high_risk_files) > 5:
+            recommendations.append(f"Found {len(high_risk_files)} high-risk files. Prioritize refactoring and testing.")
+        
+        # Complexity recommendations
+        avg_complexity = metrics.get('avg_complexity', 0)
+        if avg_complexity > 10:
+            recommendations.append(f"High average complexity ({avg_complexity:.1f}). Consider breaking down complex functions.")
+        
+        # Comment ratio recommendations
+        comment_ratio = metrics.get('comment_lines', 0) / max(metrics.get('code_lines', 1), 1)
+        if comment_ratio < 0.1:
+            recommendations.append(f"Low documentation ({comment_ratio*100:.1f}% comments). Improve code documentation.")
+        
+        # Architecture recommendations
+        density = call_graph.get('density', 0)
+        if density > 0.1:
+            recommendations.append("High architectural density detected. Consider modularization to reduce coupling.")
+        
+        # Dependency recommendations
+        if len(dependencies) > 50:
+            recommendations.append(f"Large number of dependencies ({len(dependencies)}). Review and remove unused packages.")
+        
+        if not recommendations:
+            recommendations.append("Code health looks good! Keep up the good practices.")
+        
+        return recommendations
+        
+        return '\n'.join(report)
