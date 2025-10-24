@@ -6,5 +6,12 @@ export default defineConfig({
   root: '.',
   build: {
     outDir: 'dist',
+    commonjsOptions: {
+      transformMixedEsModules: true,
+      include: [/node_modules/]
+    }
   },
+  optimizeDeps: {
+    include: ['react-syntax-highlighter']
+  }
 });
