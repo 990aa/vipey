@@ -1,6 +1,10 @@
 // VisualizationPane.tsx
 import React from 'react';
 import { ArrayVisualizer } from './ArrayVisualizer';
+import { LinkedListVisualizer } from './LinkedListVisualizer';
+import { TreeVisualizer } from './TreeVisualizer';
+import { GraphVisualizer } from './GraphVisualizer';
+import { HashMapVisualizer } from './HashMapVisualizer';
 
 interface VisualizationPaneProps {
   variable: any;
