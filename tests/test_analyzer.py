@@ -199,6 +199,12 @@ def complex_func(x, y, z):
         stable_file.write_text("def stable(): pass")
         volatile_file.write_text("def volatile(): pass")
         
+        # Create file dicts matching the expected format
+        files = [
+            {'path': str(stable_file), 'absolute_path': str(stable_file)},
+            {'path': str(volatile_file), 'absolute_path': str(volatile_file)}
+        ]
+        
         # Mock git history
         git_history = {
             'file_churn': {
@@ -208,13 +214,10 @@ def complex_func(x, y, z):
         }
         
         analyzer = ProjectAnalyzer(str(tmp_path))
-        stability = analyzer._analyze_stability(
-            [str(stable_file), str(volatile_file)],
-            git_history
-        )
+        stable_count, volatile_count = analyzer._analyze_stability(files, git_history)
         
-        assert len(stability['stable_files']) > 0
-        assert len(stability['volatile_files']) > 0
+        assert stable_count > 0
+        assert volatile_count > 0
     
     def test_generate_recommendations(self, tmp_path):
         """Test recommendation generation"""
