@@ -379,28 +379,28 @@ code {
   text-align: center;
   padding: 60px;
   font-size: 1.2em;
-  color: #8b949e;
+  color: #1565c0;
 }
 
 /* Buttons */
 button {
   padding: 10px 20px;
   font-size: 14px;
-  border: 2px solid #30363d;
+  border: 2px solid #64b5f6;
   border-radius: 6px;
-  background-color: #0d1117;
-  color: #c9d1d9;
+  background-color: #e3f2fd;
+  color: #1a237e;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
 }
 
 button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
   color: white;
-  border-color: #667eea;
+  border-color: #1e88e5;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 8px rgba(30, 136, 229, 0.3);
 }
 
 button:disabled {
