@@ -78,36 +78,36 @@ code {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  background: #161b22;
+  background: #bbdefb;
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(21, 101, 192, 0.2);
 }
 
 .tab {
   padding: 14px 28px;
-  background: #0d1117;
-  border: 2px solid #30363d;
+  background: #e3f2fd;
+  border: 2px solid #64b5f6;
   border-radius: 8px;
   cursor: pointer;
-  color: #8b949e;
+  color: #1565c0;
   transition: all 0.3s ease;
   font-size: 1em;
   font-weight: 600;
 }
 
 .tab:hover {
-  background: #1c2128;
-  color: #c9d1d9;
-  border-color: #58a6ff;
+  background: #90caf9;
+  color: #0d47a1;
+  border-color: #1e88e5;
   transform: translateY(-2px);
 }
 
 .tab.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
   color: white;
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  border-color: #1e88e5;
+  box-shadow: 0 4px 12px rgba(30, 136, 229, 0.4);
 }
 
 /* Tab Content */
