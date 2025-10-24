@@ -18,7 +18,7 @@ class Vipey:
         def wrapper(*args, **kwargs):
             source_code = inspect.getsource(func)
             ast_map = analyze_code(source_code)
-            tracer = Tracer(ast_map=ast_map, source_code=source_code)
+            tracer = Tracer(ast_map=ast_map, source_code=source_code, custom_serializers=self.custom_serializers)
             self.storyboard = tracer.trace_function(func, *args, **kwargs)
             return self.storyboard['return_value']
         return wrapper
