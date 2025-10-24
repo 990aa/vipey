@@ -19,8 +19,8 @@ class Vipey:
             source_code = inspect.getsource(func)
             ast_map = analyze_code(source_code)
             tracer = Tracer(ast_map=ast_map, source_code=source_code, custom_serializers=self.custom_serializers)
-            self.storyboard = tracer.trace_function(func, *args, **kwargs)
-            return self.storyboard['return_value']
+            self.storyboard, result = tracer.trace_function(func, *args, **kwargs)
+            return result
         return wrapper
 
     def analyze_file(self, file_path: str) -> dict:

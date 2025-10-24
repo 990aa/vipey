@@ -31,11 +31,14 @@ class Tracer:
         result = func(*args, **kwargs)
         sys.settrace(None)
         
-        return {
+        storyboard_data = {
             'frames': self.storyboard,
             'return_value': self._serialize_value(self._return_value),
             'source_code': self.source_code
         }
+        
+        # Return both storyboard and the actual result
+        return storyboard_data, result
     
     def _serialize_locals(self, locals_dict: dict) -> dict:
         """Serialize local variables, handling common Python types."""
