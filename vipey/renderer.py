@@ -416,6 +416,172 @@ def _create_static_multi_tab_html(storyboard_data, project_data, file_data, outp
     print(f"Multi-tab visualization saved to: {output_path}")
 
 
+def _generate_plotly_charts(project_data):
+    """Generate interactive Plotly charts for project analysis"""
+    if not HAS_PLOTLY:
+        return {}
+    
+    charts = {}
+    metrics = project_data.get('metrics', {})
+    
+    # 1. Language Distribution Pie Chart
+    lang_dist = metrics.get('language_distribution', {})
+    if lang_dist:
+        langs = []
+        percentages = []
+        for lang, stats in sorted(lang_dist.items(), key=lambda x: x[1]['percentage'], reverse=True)[:10]:
+            langs.append(lang)
+            percentages.append(stats['percentage'])
+        
+        fig = go.Figure(data=[go.Pie(
+            labels=langs,
+            values=percentages,
+            hole=0.3,
+            marker=dict(colors=px.colors.qualitative.Set3)
+        )])
+        fig.update_layout(
+            title="Language Distribution",
+            height=400,
+            showlegend=True
+        )
+        charts['language_distribution'] = fig.to_html(include_plotlyjs='cdn', div_id='lang-dist-chart')
+    
+    # 2. File Risk Scores Bar Chart
+    advanced_report = project_data.get('advanced_report', {})
+    if advanced_report and 'high_risk_files' in advanced_report:
+        risk_files = advanced_report['high_risk_files'][:15]
+        if risk_files:
+            files = [Path(f['file']).name for f in risk_files]
+            scores = [f['risk_score'] for f in risk_files]
+            
+            fig = go.Figure(data=[go.Bar(
+                x=files,
+                y=scores,
+                marker=dict(
+                    color=scores,
+                    colorscale='Reds',
+                    showscale=True,
+                    colorbar=dict(title="Risk Score")
+                )
+            )])
+            fig.update_layout(
+                title="Top 15 High-Risk Files",
+                xaxis_title="File",
+                yaxis_title="Risk Score",
+                height=400,
+                xaxis_tickangle=-45
+            )
+            charts['risk_scores'] = fig.to_html(include_plotlyjs='cdn', div_id='risk-chart')
+    
+    # 3. Complexity Distribution Bar Chart
+    nextgen_report = project_data.get('nextgen_report', {})
+    if nextgen_report and 'architectural_analysis' in nextgen_report:
+        arch = nextgen_report['architectural_analysis']
+        if 'high_complexity_modules' in arch:
+            modules = arch['high_complexity_modules'][:15]
+            if modules:
+                mod_names = [Path(m['file']).name for m in modules]
+                complexities = [m['complexity'] for m in modules]
+                
+                fig = go.Figure(data=[go.Bar(
+                    x=mod_names,
+                    y=complexities,
+                    marker=dict(color='indianred')
+                )])
+                fig.update_layout(
+                    title="Top 15 Complex Modules",
+                    xaxis_title="Module",
+                    yaxis_title="Cyclomatic Complexity",
+                    height=400,
+                    xaxis_tickangle=-45
+                )
+                charts['complexity'] = fig.to_html(include_plotlyjs='cdn', div_id='complexity-chart')
+    
+    # 4. File Churn Over Time (Git History)
+    git = project_data.get('git_history', {})
+    if git and git.get('file_churn'):
+        file_churn = sorted(git['file_churn'].items(), key=lambda x: x[1]['commits'], reverse=True)[:15]
+        if file_churn:
+            files = [Path(f[0]).name for f in file_churn]
+            commits = [f[1]['commits'] for f in file_churn]
+            additions = [f[1]['additions'] for f in file_churn]
+            deletions = [f[1]['deletions'] for f in file_churn]
+            
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name='Commits', x=files, y=commits, marker_color='lightblue'))
+            fig.add_trace(go.Bar(name='Additions', x=files, y=additions, marker_color='lightgreen'))
+            fig.add_trace(go.Bar(name='Deletions', x=files, y=deletions, marker_color='salmon'))
+            
+            fig.update_layout(
+                title="File Churn (Top 15 Files)",
+                xaxis_title="File",
+                yaxis_title="Count",
+                barmode='group',
+                height=400,
+                xaxis_tickangle=-45
+            )
+            charts['file_churn'] = fig.to_html(include_plotlyjs='cdn', div_id='churn-chart')
+    
+    # 5. Dependency Type Distribution Pie Chart
+    dependencies = project_data.get('dependencies', {})
+    if dependencies:
+        dep_types = {}
+        for pkg, info in dependencies.items():
+            dep_type = info.get('type', 'unknown')
+            dep_types[dep_type] = dep_types.get(dep_type, 0) + 1
+        
+        if dep_types:
+            fig = go.Figure(data=[go.Pie(
+                labels=list(dep_types.keys()),
+                values=list(dep_types.values()),
+                marker=dict(colors=px.colors.qualitative.Pastel)
+            )])
+            fig.update_layout(
+                title="Dependency Types",
+                height=400
+            )
+            charts['dependency_types'] = fig.to_html(include_plotlyjs='cdn', div_id='dep-types-chart')
+    
+    # 6. Code Quality Metrics Radar Chart
+    if nextgen_report and 'code_evolution_dna' in nextgen_report:
+        evolution = nextgen_report['code_evolution_dna']
+        categories = []
+        values = []
+        
+        if 'test_coverage_trend' in evolution:
+            categories.append('Test Coverage')
+            values.append(evolution.get('current_coverage_estimate', 0) * 100)
+        
+        avg_complexity = metrics.get('avg_complexity', 0)
+        categories.append('Code Quality<br>(100-complexity)')
+        values.append(max(0, 100 - avg_complexity * 2))
+        
+        comment_ratio = metrics.get('comment_ratio', 0)
+        categories.append('Documentation')
+        values.append(comment_ratio * 100)
+        
+        maintainability = 100 - (len(advanced_report.get('high_risk_files', [])) * 5)
+        categories.append('Maintainability')
+        values.append(max(0, maintainability))
+        
+        if categories and values:
+            fig = go.Figure()
+            fig.add_trace(go.Scatterpolar(
+                r=values,
+                theta=categories,
+                fill='toself',
+                name='Project Metrics'
+            ))
+            fig.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                title="Code Quality Overview",
+                height=400
+            )
+            charts['quality_radar'] = fig.to_html(include_plotlyjs='cdn', div_id='quality-radar-chart')
+    
+    return charts
+
+
 def _generate_project_analysis_html(project_data, file_data):
     """Generate HTML for project analysis tab"""
     if not project_data and not file_data:
