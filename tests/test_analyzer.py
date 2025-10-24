@@ -227,8 +227,15 @@ def complex_func(x, y, z):
         analyzer = ProjectAnalyzer(str(tmp_path))
         result = analyzer.analyze_project()
         
-        # Generate recommendations
-        recommendations = analyzer._generate_recommendations(result)
+        # Generate recommendations with proper arguments
+        file_risks = [('file1.py', 0.5)]
+        metrics = result['metrics']
+        dependencies = result.get('dependencies', {})
+        call_graph = result.get('call_graph', {})
+        
+        recommendations = analyzer._generate_recommendations(
+            file_risks, metrics, dependencies, call_graph
+        )
         
         assert isinstance(recommendations, list)
         # Should have at least some recommendations
