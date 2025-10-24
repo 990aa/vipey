@@ -26,17 +26,30 @@ class ListNode:
 
 def test_linked_list_detection():
     """Test that tracer detects and serializes linked lists."""
-    viz = Vipey()
-    tracer = viz.tracer
-    
     # Create a linked list: 1 -> 2 -> 3
     head = ListNode(1, ListNode(2, ListNode(3)))
     
-    serialized = tracer._serialize_value(head)
+    viz = Vipey()
     
-    assert serialized['type'] == 'LinkedList'
-    assert serialized['values'] == [1, 2, 3]
-    assert '1 -> 2 -> 3' in serialized['display']
+    def process_list(node):
+        # Just return the node for serialization testing
+        return node
+    
+    captured = viz.capture(process_list)
+    captured(head)
+    
+    # Check if the linked list was properly serialized in storyboard
+    assert viz.storyboard is not None
+    # Look for the linked list in locals
+    for frame in viz.storyboard['frames']:
+        if 'node' in frame['locals']:
+            node_data = frame['locals']['node']
+            if isinstance(node_data, dict) and node_data.get('type') == 'LinkedList':
+                assert node_data['values'] == [1, 2, 3]
+                assert '1 -> 2 -> 3' in node_data['display']
+                return
+    
+    pytest.fail("LinkedList serialization not found in storyboard")
 
 
 def test_linked_list_circular_detection():
