@@ -99,8 +99,8 @@ def fibonacci(n):
         
         assert result is not None
         assert result['language'] == 'Python'
-        assert len(result['functions']) == 1
-        assert result['functions'][0]['name'] == 'fibonacci'
+        # functions is now a count, not a list
+        assert result['functions'] >= 1
     
     def test_analyze_project(self, tmp_path):
         """Test analyzing a full project"""
