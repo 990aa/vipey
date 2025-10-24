@@ -386,15 +386,41 @@ def _create_static_multi_tab_html(storyboard_data, project_data, file_data, outp
     tab_contents = []
     
     if storyboard_data:
+        # Get time complexity if available
+        complexity = storyboard_data.get('time_complexity', {})
+        complexity_html = ""
+        if complexity:
+            big_o = complexity.get('big_o', 'Unknown')
+            explanation = complexity.get('explanation', '')
+            patterns = complexity.get('patterns', [])
+            confidence = complexity.get('confidence', 'unknown')
+            
+            pattern_badges = ' '.join([f'<span class="badge badge-info">{p}</span>' for p in patterns])
+            confidence_color = {'high': 'success', 'medium': 'warning', 'low': 'danger'}.get(confidence, 'info')
+            
+            complexity_html = f'''
+            <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-top: 20px;">
+                <h3 style="color: white;">⏱️ Time Complexity Analysis</h3>
+                <div style="font-size: 2em; font-weight: bold; margin: 15px 0;">{big_o}</div>
+                <p style="opacity: 0.9;">{explanation}</p>
+                {f'<div style="margin-top: 10px;">Patterns detected: {pattern_badges}</div>' if patterns else ''}
+                <div style="margin-top: 10px; opacity: 0.8;">
+                    <span class="badge badge-{confidence_color}">Confidence: {confidence}</span>
+                </div>
+            </div>
+            '''
+        
         tab_headers.append('<div class="tab" data-tab="trace" onclick="switchTab(\'trace\')">Function Trace</div>')
         tab_contents.append(f'''
         <div id="trace-content" class="tab-content">
             <h2>Function Execution Trace</h2>
             <p>Interactive execution trace not available in static mode. Use <code>interactive=True</code> for full trace visualization.</p>
+            {complexity_html}
             <div class="metric-card">
                 <h3>Execution Summary</h3>
-                <p>Total frames captured: {len(storyboard_data.get('frames', []))}</p>
-                <p>Return value: <code>{storyboard_data.get('return_value', 'N/A')}</code></p>
+                <p><strong>Function:</strong> <code>{storyboard_data.get('function_name', 'unknown')}</code></p>
+                <p><strong>Total frames captured:</strong> {len(storyboard_data.get('frames', []))}</p>
+                <p><strong>Return value:</strong> <code>{storyboard_data.get('return_value', 'N/A')}</code></p>
             </div>
         </div>
         ''')
