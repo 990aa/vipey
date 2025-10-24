@@ -79,23 +79,36 @@ class Solution:
         return bridges
 
 # --- Example Usage ---
-sol = Solution()
+if __name__ == "__main__":
+    viz = Vipey()
+    sol = Solution()
 
-# Example 1:
-n1 = 4
-connections1 = [[0, 1], [1, 2], [2, 0], [1, 3]]
-print(f"Graph 1 (n={n1}, connections={connections1})")
-bridges1 = sol.criticalConnections(n1, connections1)
-print(f"Critical Connections: {bridges1}")  # Output: [[1, 3]]
+    # Example 1:
+    n1 = 4
+    connections1 = [[0, 1], [1, 2], [2, 0], [1, 3]]
+    print(f"Graph 1 (n={n1}, connections={connections1})")
+    
+    captured_func = viz.capture(sol.criticalConnections)
+    bridges1 = captured_func(n1, connections1)
+    print(f"Critical Connections: {bridges1}")  # Output: [[1, 3]]
 
-print("-" * 20)
+    print("-" * 20)
 
-# Example 2: More complex
-n2 = 6
-connections2 = [[0, 1], [1, 2], [2, 0], [1, 3], [3, 4], [4, 5], [5, 3]]
-# 
-# This graph has two cycles: (0, 1, 2) and (3, 4, 5). 
-# The only edge connecting them is (1, 3).
-print(f"Graph 2 (n={n2}, connections={connections2})")
-bridges2 = sol.criticalConnections(n2, connections2)
-print(f"Critical Connections: {bridges2}")  # Output: [[1, 3]]
+    # Example 2: More complex
+    n2 = 6
+    connections2 = [[0, 1], [1, 2], [2, 0], [1, 3], [3, 4], [4, 5], [5, 3]]
+    # 
+    # This graph has two cycles: (0, 1, 2) and (3, 4, 5). 
+    # The only edge connecting them is (1, 3).
+    print(f"Graph 2 (n={n2}, connections={connections2})")
+    
+    sol2 = Solution()
+    captured_func2 = viz.capture(sol2.criticalConnections)
+    bridges2 = captured_func2(n2, connections2)
+    print(f"Critical Connections: {bridges2}")  # Output: [[1, 3]]
+    
+    # Save visualization
+    print("\n" + "=" * 60)
+    print("Generating visualization...")
+    print("=" * 60)
+    viz.save(interactive=True)

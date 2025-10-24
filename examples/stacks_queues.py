@@ -19,6 +19,7 @@ Window Position                Max
 """
 
 import collections
+from vipey import Vipey
 
 class Solution:
     def maxSlidingWindow(self, nums: list[int], k: int) -> list[int]:
@@ -68,26 +69,42 @@ class Solution:
         return output
 
 # --- Example Usage ---
-sol = Solution()
+if __name__ == "__main__":
+    viz = Vipey()
+    sol = Solution()
 
-nums = [1, 3, -1, -3, 5, 3, 6, 7]
-k = 3
-print(f"Array: {nums}, k: {k}")
-result = sol.maxSlidingWindow(nums, k)
-print(f"Result: {result}")  # Output: [3, 3, 5, 5, 6, 7]
+    nums = [1, 3, -1, -3, 5, 3, 6, 7]
+    k = 3
+    print(f"Array: {nums}, k: {k}")
+    
+    captured_func = viz.capture(sol.maxSlidingWindow)
+    result = captured_func(nums, k)
+    print(f"Result: {result}")  # Output: [3, 3, 5, 5, 6, 7]
 
-print("-" * 20)
+    print("-" * 20)
 
-nums2 = [1]
-k2 = 1
-print(f"Array: {nums2}, k: {k2}")
-result2 = sol.maxSlidingWindow(nums2, k2)
-print(f"Result: {result2}") # Output: [1]
+    nums2 = [1]
+    k2 = 1
+    print(f"Array: {nums2}, k: {k2}")
+    
+    sol2 = Solution()
+    captured_func2 = viz.capture(sol2.maxSlidingWindow)
+    result2 = captured_func2(nums2, k2)
+    print(f"Result: {result2}") # Output: [1]
 
-print("-" * 20)
+    print("-" * 20)
 
-nums3 = [9, 10, 9, -7, -4, -8, 2, -6]
-k3 = 5
-print(f"Array: {nums3}, k: {k3}")
-result3 = sol.maxSlidingWindow(nums3, k3)
-print(f"Result: {result3}") # Output: [10, 10, 9, 2, 2]
+    nums3 = [9, 10, 9, -7, -4, -8, 2, -6]
+    k3 = 5
+    print(f"Array: {nums3}, k: {k3}")
+    
+    sol3 = Solution()
+    captured_func3 = viz.capture(sol3.maxSlidingWindow)
+    result3 = captured_func3(nums3, k3)
+    print(f"Result: {result3}") # Output: [10, 10, 9, 2, 2]
+    
+    # Save visualization
+    print("\n" + "=" * 60)
+    print("Generating visualization...")
+    print("=" * 60)
+    viz.save(interactive=True)

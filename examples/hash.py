@@ -8,6 +8,7 @@ If the cache is full (i.e., size == capacity), evict the least recently used ite
 """
 
 import collections
+from vipey import Vipey
 
 # We need a DLinkedNode to store key/value
 # This allows us to delete from the hash map when evicting from the list
@@ -91,17 +92,30 @@ class LRUCache:
             self._move_to_head(node)
 
 # --- Example Usage ---
-print("LRU Cache with capacity 2")
-cache = LRUCache(2)
+if __name__ == "__main__":
+    viz = Vipey()
+    
+    print("LRU Cache with capacity 2")
+    cache = LRUCache(2)
 
-cache.put(1, 1)    # cache is {1: 1}
-cache.put(2, 2)    # cache is {1: 1, 2: 2}
-print(f"Get 1: {cache.get(1)}") # returns 1, cache is {2: 2, 1: 1} (1 is now most recent)
+    # Wrap the operations for visualization
+    captured_put = viz.capture(cache.put)
+    captured_get = viz.capture(cache.get)
 
-cache.put(3, 3)    # LRU key 2 was evicted. cache is {1: 1, 3: 3}
-print(f"Get 2: {cache.get(2)}") # returns -1 (not found)
+    captured_put(1, 1)    # cache is {1: 1}
+    captured_put(2, 2)    # cache is {1: 1, 2: 2}
+    print(f"Get 1: {captured_get(1)}") # returns 1, cache is {2: 2, 1: 1} (1 is now most recent)
 
-cache.put(4, 4)    # LRU key 1 was evicted. cache is {3: 3, 4: 4}
-print(f"Get 1: {cache.get(1)}") # returns -1 (not found)
-print(f"Get 3: {cache.get(3)}") # returns 3. cache is {4: 4, 3: 3}
-print(f"Get 4: {cache.get(4)}") # returns 4. cache is {3: 3, 4: 4}
+    captured_put(3, 3)    # LRU key 2 was evicted. cache is {1: 1, 3: 3}
+    print(f"Get 2: {captured_get(2)}") # returns -1 (not found)
+
+    captured_put(4, 4)    # LRU key 1 was evicted. cache is {3: 3, 4: 4}
+    print(f"Get 1: {captured_get(1)}") # returns -1 (not found)
+    print(f"Get 3: {captured_get(3)}") # returns 3. cache is {4: 4, 3: 3}
+    print(f"Get 4: {captured_get(4)}") # returns 4. cache is {3: 3, 4: 4}
+    
+    # Save visualization
+    print("\n" + "=" * 60)
+    print("Generating visualization...")
+    print("=" * 60)
+    viz.save(interactive=True)

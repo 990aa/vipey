@@ -13,6 +13,7 @@ Nodes 0, 1, and 2 form a cycle ($0 \rightarrow 1 \rightarrow 2 \rightarrow 0$). 
 
 
 from collections import defaultdict
+from vipey import Vipey
 
 class Solution:
     def findSCCs(self, n: int, connections: list[list[int]]) -> list[list[int]]:
@@ -89,27 +90,40 @@ class Solution:
         return sccs
 
 # --- Example Usage ---
-sol = Solution()
+if __name__ == "__main__":
+    viz = Vipey()
+    sol = Solution()
 
-# Example 1:
-n1 = 5
-connections1 = [[0, 1], [1, 2], [2, 0], [1, 3], [3, 4]]
-print(f"Graph 1 (n={n1}, connections={connections1})")
-sccs1 = sol.findSCCs(n1, connections1)
-print(f"Strongly Connected Components: {sccs1}") 
-# Output: [[4], [3], [0, 1, 2]] (order may vary)
+    # Example 1:
+    n1 = 5
+    connections1 = [[0, 1], [1, 2], [2, 0], [1, 3], [3, 4]]
+    print(f"Graph 1 (n={n1}, connections={connections1})")
+    
+    captured_func = viz.capture(sol.findSCCs)
+    sccs1 = captured_func(n1, connections1)
+    print(f"Strongly Connected Components: {sccs1}") 
+    # Output: [[4], [3], [0, 1, 2]] (order may vary)
 
-print("-" * 20)
+    print("-" * 20)
 
-# Example 2: More complex, multiple cycles
-n2 = 8
-connections2 = [
-    [0, 1], [1, 2], [2, 0],  # SCC 1: {0, 1, 2}
-    [1, 3], [3, 4], [4, 5],  # Path
-    [5, 3],                 # SCC 2: {3, 4, 5}
-    [2, 6], [6, 7], [7, 6]   # SCC 3: {6, 7}
-]
-print(f"Graph 2 (n={n2}, connections={connections2})")
-sccs2 = sol.findSCCs(n2, connections2)
-print(f"Strongly Connected Components: {sccs2}")
-# Output: [[6, 7], [3, 4, 5], [0, 1, 2]] (order may vary)
+    # Example 2: More complex, multiple cycles
+    n2 = 8
+    connections2 = [
+        [0, 1], [1, 2], [2, 0],  # SCC 1: {0, 1, 2}
+        [1, 3], [3, 4], [4, 5],  # Path
+        [5, 3],                 # SCC 2: {3, 4, 5}
+        [2, 6], [6, 7], [7, 6]   # SCC 3: {6, 7}
+    ]
+    print(f"Graph 2 (n={n2}, connections={connections2})")
+    
+    sol2 = Solution()
+    captured_func2 = viz.capture(sol2.findSCCs)
+    sccs2 = captured_func2(n2, connections2)
+    print(f"Strongly Connected Components: {sccs2}")
+    # Output: [[6, 7], [3, 4, 5], [0, 1, 2]] (order may vary)
+    
+    # Save visualization
+    print("\n" + "=" * 60)
+    print("Generating visualization...")
+    print("=" * 60)
+    viz.save(interactive=True)

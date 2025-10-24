@@ -16,6 +16,7 @@ Return the new root of the (potentially) modified tree.
 """
 
 import sys
+from vipey import Vipey
 
 # Node class for the AVL Tree
 class Node:
@@ -183,33 +184,42 @@ class AVLTree:
         self.preOrder(root.right)
 
 # --- Example Usage ---
-tree = AVLTree()
-root = None
+if __name__ == "__main__":
+    viz = Vipey()
+    tree = AVLTree()
+    root = None
 
-# Insert nodes
-keys = [10, 20, 30, 40, 50, 25]
-for key in keys:
-    root = tree.insert(root, key)
+    # Insert nodes
+    keys = [10, 20, 30, 40, 50, 25]
+    for key in keys:
+        root = tree.insert(root, key)
 
-print("Tree after insertions:")
-tree.preOrder(root)
-print("\n" + "-"*20)
+    print("Tree after insertions:")
+    tree.preOrder(root)
+    print("\n" + "-"*20)
 
-# Delete a node that causes rebalancing
-print("Deleting 40...")
-root = tree.delete(root, 40)
-print("Tree after deleting 40:")
-tree.preOrder(root)
-print("\n" + "-"*20)
+    # Wrap delete operations for visualization
+    print("Deleting 40...")
+    captured_delete = viz.capture(tree.delete)
+    root = captured_delete(root, 40)
+    print("Tree after deleting 40:")
+    tree.preOrder(root)
+    print("\n" + "-"*20)
 
-print("Deleting 50...")
-root = tree.delete(root, 50)
-print("Tree after deleting 50:")
-tree.preOrder(root)
-print("\n" + "-"*20)
+    print("Deleting 50...")
+    root = tree.delete(root, 50)
+    print("Tree after deleting 50:")
+    tree.preOrder(root)
+    print("\n" + "-"*20)
 
-print("Deleting 30...")
-root = tree.delete(root, 30)
-print("Tree after deleting 30:")
-tree.preOrder(root)
-print("\n" + "-"*20)
+    print("Deleting 30...")
+    root = tree.delete(root, 30)
+    print("Tree after deleting 30:")
+    tree.preOrder(root)
+    print("\n" + "-"*20)
+    
+    # Save visualization
+    print("\n" + "=" * 60)
+    print("Generating visualization...")
+    print("=" * 60)
+    viz.save(interactive=True)
