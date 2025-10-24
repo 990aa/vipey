@@ -33,7 +33,7 @@ class Tracer:
         
         return {
             'frames': self.storyboard,
-            'return_value': self._return_value,
+            'return_value': self._serialize_value(self._return_value),
             'source_code': self.source_code
         }
     
