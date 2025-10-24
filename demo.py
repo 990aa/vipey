@@ -2,7 +2,7 @@
 """
 Demo script for vipey - Comprehensive demonstration of all features
 """
-from vipey import Visualizer
+from vipey import Vipey
 import sys
 
 def bubble_sort(arr):
@@ -20,8 +20,8 @@ def main():
     print("=" * 60)
     print()
     
-    # Create a visualizer instance
-    viz = Visualizer()
+    # Create a vipey instance
+    viz = Vipey()
     
     # Demo 1: Function execution tracing
     print("1. Capturing bubble sort execution...")
@@ -63,14 +63,14 @@ def main():
     else:
         print("   Creating static HTML file...")
         viz.save(interactive=False)
-        print("   ✓ Visualization saved to: vipey/visualization.html")
+        print("   ✓ Visualization saved to: viz/visualization.html")
         print()
         print("   The visualization includes:")
         print("   • Function Trace tab - Bubble sort execution")
         print("   • Project Analysis tab - Comprehensive metrics")
         print("   • Documentation tab - Full API reference")
         print()
-        print("   Open vipey/visualization.html in your browser to view!")
+        print("   Open viz/visualization.html in your browser to view!")
     
     print()
     print("=" * 60)
