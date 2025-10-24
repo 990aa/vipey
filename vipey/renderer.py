@@ -843,15 +843,17 @@ def _start_interactive_server(storyboard_data, project_data, file_data):
     @app.route('/api/project')
     def get_project():
         """API endpoint for project analysis data"""
+        from flask import Response
+        
         project = app.config.get('PROJECT_DATA')
         file_info = app.config.get('FILE_DATA')
         
         if not project and not file_info:
-            return '<p>No analysis data available.</p>'
+            return Response('<p>No analysis data available.</p>', mimetype='text/html')
         
         # Generate HTML for project analysis
         html = _generate_project_analysis_html(project, file_info)
-        return html
+        return Response(html, mimetype='text/html')
     
     @app.route('/api/documentation')
     def get_documentation():
@@ -870,11 +872,17 @@ def _start_interactive_server(storyboard_data, project_data, file_data):
         
         return html
     
-    def open_browser():
-        time.sleep(1.5)
-        webbrowser.open('http://127.0.0.1:5000')
+    # Track if browser has been opened
+    browser_opened = False
     
-    # Start browser in separate thread
+    def open_browser():
+        nonlocal browser_opened
+        if not browser_opened:
+            time.sleep(1.5)
+            webbrowser.open('http://127.0.0.1:5000')
+            browser_opened = True
+    
+    # Start browser in separate thread (only once)
     threading.Thread(target=open_browser, daemon=True).start()
     
     print("\n" + "="*70)
@@ -887,7 +895,7 @@ def _start_interactive_server(storyboard_data, project_data, file_data):
     print("="*70 + "\n")
     
     try:
-        app.run(debug=False, port=5000, use_reloader=False)
+        app.run(debug=False, port=5000, use_reloader=False, threaded=True)
     except KeyboardInterrupt:
         print("\n" + "="*70)
         print("✋ Server stopped by user")
