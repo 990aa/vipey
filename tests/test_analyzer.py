@@ -29,7 +29,7 @@ def add(a, b):
         analyzer = ProjectAnalyzer(str(tmp_path))
         result = analyzer.analyze_file(test_file)
         
-        assert result['file'] == str(test_file)
+        assert result['absolute_path'] == str(test_file)
         assert result['language'] == 'Python'
         assert result['total_lines'] > 0
         assert result['code_lines'] > 0
