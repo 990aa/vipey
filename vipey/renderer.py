@@ -22,6 +22,14 @@ try:
 except ImportError:
     HAS_FLASK = False
 
+try:
+    import plotly.graph_objects as go
+    import plotly.express as px
+    from plotly.subplots import make_subplots
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
+
 
 def save_visualization(storyboard_data: dict, output_path: str):
     """Save visualization as a self-contained HTML file."""
