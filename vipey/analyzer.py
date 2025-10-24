@@ -607,87 +607,100 @@ class ProjectAnalyzer:
         
         return advanced_report
     
-    def generate_nextgen_report(self, analysis: Dict) -> str:
+    def generate_nextgen_report(self, analysis: Dict) -> Dict:
         """Generate next-generation analysis with predictive insights"""
-        report = []
         files = analysis['files']
         metrics = analysis['metrics']
         git = analysis.get('git_history', {})
         call_graph = analysis.get('call_graph', {})
         dependencies = analysis.get('dependencies', {})
         
-        report.append("=" * 80)
-        report.append(">>>> NEXT-GENERATION CODE INTELLIGENCE REPORT")
-        report.append("=" * 80)
-        report.append("")
+        nextgen_report = {}
         
         # Predictive Risk Analysis
-        report.append(">>>> PREDICTIVE RISK ANALYSIS")
-        report.append("-" * 40)
-        
-        # Calculate risk scores for files
         file_risks = []
         for f in files:
             risk_score = self._calculate_file_risk(f, git)
             file_risks.append((f['path'], risk_score))
         
         file_risks.sort(key=lambda x: x[1], reverse=True)
-        top_risks = file_risks[:5]
+        top_risks = file_risks[:10]
+        avg_risk = sum(r for _, r in file_risks) / len(file_risks) if file_risks else 0
         
-        if top_risks:
-            report.append("Top 5 High-Risk Files:")
-            for path, risk in top_risks:
-                report.append(f"  {path}: {risk*100:.1f}% risk")
-            avg_risk = sum(r for _, r in file_risks) / len(file_risks) if file_risks else 0
-            report.append(f"Average Project Risk: {avg_risk*100:.1f}%")
-        else:
-            report.append("No risk analysis data available")
-        report.append("")
+        nextgen_report['predictive_risk_analysis'] = {
+            'top_risk_files': [{'file': path, 'risk_score': risk} for path, risk in top_risks],
+            'average_project_risk': avg_risk,
+            'high_risk_count': sum(1 for _, r in file_risks if r > 0.5)
+        }
         
         # Architectural Analysis
-        report.append(">>>>>> ARCHITECTURAL ANALYSIS")
-        report.append("-" * 40)
-        report.append(f"Call Graph Size: {call_graph.get('total_nodes', 0)} functions, {call_graph.get('total_edges', 0)} calls")
-        report.append(f"Architecture Density: {call_graph.get('density', 0):.3f}")
-        report.append("")
+        total_funcs = metrics.get('total_functions', 0)
+        complex_modules = []
+        for f in files:
+            funcs = f.get('functions', []) if isinstance(f.get('functions'), list) else []
+            for func in funcs:
+                if isinstance(func, dict) and func.get('complexity', 0) > 10:
+                    complex_modules.append({
+                        'file': f.get('path', ''),
+                        'function': func.get('name', ''),
+                        'complexity': func.get('complexity', 0)
+                    })
+        
+        complex_modules.sort(key=lambda x: x['complexity'], reverse=True)
+        
+        nextgen_report['architectural_analysis'] = {
+            'call_graph_nodes': call_graph.get('total_nodes', 0),
+            'call_graph_edges': call_graph.get('total_edges', 0),
+            'architecture_density': call_graph.get('density', 0),
+            'high_complexity_modules': complex_modules[:15],
+            'total_functions': total_funcs
+        }
         
         # Dependency Ecosystem
-        report.append(">>>> DEPENDENCY ECOSYSTEM")
-        report.append("-" * 40)
-        report.append(f"Total Dependencies: {len(dependencies)}")
         py_deps = [d for d in dependencies.values() if d.get('type') == 'python']
         js_deps = [d for d in dependencies.values() if d.get('type') == 'nodejs']
-        report.append(f"Python Dependencies: {len(py_deps)}")
-        report.append(f"JavaScript Dependencies: {len(js_deps)}")
-        report.append("")
+        
+        nextgen_report['dependency_ecosystem'] = {
+            'total_dependencies': len(dependencies),
+            'python_dependencies': len(py_deps),
+            'javascript_dependencies': len(js_deps),
+            'dependency_breakdown': {
+                'python': len(py_deps),
+                'nodejs': len(js_deps),
+                'other': len(dependencies) - len(py_deps) - len(js_deps)
+            }
+        }
         
         # AI-Augmented Insights
-        report.append(">>>> AI-AUGMENTED INSIGHTS")
-        report.append("-" * 40)
-        report.append(f"Files with AI Summaries: 0")
-        report.append("")
+        nextgen_report['ai_insights'] = {
+            'files_with_summaries': 0,
+            'semantic_patterns': [],
+            'suggested_refactorings': []
+        }
         
         # Code Evolution DNA
-        report.append(">>>> CODE EVOLUTION DNA")
-        report.append("-" * 40)
         stable_count, volatile_count = self._analyze_stability(files, git)
         total_files = len(files)
         stability_ratio = stable_count / total_files if total_files > 0 else 0
         
-        report.append(f"Stable Files: {stable_count}")
-        report.append(f"Volatile Files: {volatile_count}")
-        report.append(f"Codebase Stability: {stability_ratio*100:.1f}%")
-        report.append("")
+        nextgen_report['code_evolution_dna'] = {
+            'stable_files': stable_count,
+            'volatile_files': volatile_count,
+            'total_files': total_files,
+            'stability_ratio': stability_ratio,
+            'current_coverage_estimate': metrics.get('comment_ratio', 0)
+        }
         
         # Recommendations
-        report.append(">>>> RECOMMENDATIONS & INSIGHTS")
-        report.append("-" * 40)
         recommendations = self._generate_recommendations(file_risks, metrics, dependencies, call_graph)
-        for i, rec in enumerate(recommendations[:5], 1):
-            report.append(f"{i}. {rec}")
-        report.append("")
         
-        return '\n'.join(report)
+        nextgen_report['recommendations'] = {
+            'high_priority': recommendations[:3],
+            'medium_priority': recommendations[3:6] if len(recommendations) > 3 else [],
+            'all_recommendations': recommendations
+        }
+        
+        return nextgen_report
     
     def _calculate_file_risk(self, file_info: Dict, git_history: Dict) -> float:
         """Calculate risk score for a file (0.0 to 1.0)"""
