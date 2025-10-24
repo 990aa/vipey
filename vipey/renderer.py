@@ -590,36 +590,86 @@ def _generate_project_analysis_html(project_data, file_data):
     data = project_data or {'metrics': {}, 'files': [file_data] if file_data else []}
     metrics = data.get('metrics', {})
     
+    # Generate Plotly charts
+    charts = _generate_plotly_charts(data) if project_data else {}
+    
     html = f"""
     <h2>Project Analysis Results</h2>
+    """
     
+    # Add interactive charts if available
+    if charts:
+        html += """
+        <div class="metric-card">
+            <h3>📊 Interactive Visualizations</h3>
+            <p style="color: #666; margin-bottom: 20px;">Hover over charts for detailed information. Click and drag to zoom.</p>
+        """
+        
+        # Add charts in a grid layout
+        if 'quality_radar' in charts:
+            html += f'<div style="margin-bottom: 30px;">{charts["quality_radar"]}</div>'
+        
+        # Row 1: Language distribution and dependency types
+        html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">'
+        if 'language_distribution' in charts:
+            html += f'<div>{charts["language_distribution"]}</div>'
+        if 'dependency_types' in charts:
+            html += f'<div>{charts["dependency_types"]}</div>'
+        html += '</div>'
+        
+        # Row 2: Risk scores and complexity
+        html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">'
+        if 'risk_scores' in charts:
+            html += f'<div>{charts["risk_scores"]}</div>'
+        if 'complexity' in charts:
+            html += f'<div>{charts["complexity"]}</div>'
+        html += '</div>'
+        
+        # Row 3: File churn (full width)
+        if 'file_churn' in charts:
+            html += f'<div style="margin-bottom: 30px;">{charts["file_churn"]}</div>'
+        
+        html += """
+        </div>
+        """
+    
+    html += """
     <div class="metric-grid">
         <div class="metric-item">
             <div class="metric-label">Total Files</div>
-            <div class="metric-value">{metrics.get('total_files', 0):,}</div>
+            <div class="metric-value">{:,}</div>
         </div>
         <div class="metric-item">
             <div class="metric-label">Total Lines</div>
-            <div class="metric-value">{metrics.get('total_lines', 0):,}</div>
+            <div class="metric-value">{:,}</div>
         </div>
         <div class="metric-item">
             <div class="metric-label">Code Lines</div>
-            <div class="metric-value">{metrics.get('code_lines', 0):,}</div>
+            <div class="metric-value">{:,}</div>
         </div>
         <div class="metric-item">
             <div class="metric-label">Functions</div>
-            <div class="metric-value">{metrics.get('total_functions', 0):,}</div>
+            <div class="metric-value">{:,}</div>
         </div>
         <div class="metric-item">
             <div class="metric-label">Classes</div>
-            <div class="metric-value">{metrics.get('total_classes', 0):,}</div>
+            <div class="metric-value">{:,}</div>
         </div>
         <div class="metric-item">
             <div class="metric-label">Avg Complexity</div>
-            <div class="metric-value">{metrics.get('avg_complexity', 0):.1f}</div>
+            <div class="metric-value">{:.1f}</div>
         </div>
     </div>
+    """.format(
+        metrics.get('total_files', 0),
+        metrics.get('total_lines', 0),
+        metrics.get('code_lines', 0),
+        metrics.get('total_functions', 0),
+        metrics.get('total_classes', 0),
+        metrics.get('avg_complexity', 0)
+    )
     
+    html += """
     <div class="metric-card">
         <h3>Language Distribution</h3>
         <table>
