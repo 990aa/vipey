@@ -6,7 +6,7 @@ from .ast_parser import analyze_code
 from .renderer import save_visualization, save_multi_tab_visualization
 from .analyzer import ProjectAnalyzer
 
-class Visualizer:
+class Vipey:
     def __init__(self):
         self.storyboard = None
         self.custom_serializers = {}
@@ -87,3 +87,7 @@ class Visualizer:
     def register_serializer(self, data_type, serializer_func):
         """Register a custom serializer for a data type."""
         self.custom_serializers[data_type] = serializer_func
+
+
+# Backward compatibility alias
+Visualizer = Vipey
