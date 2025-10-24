@@ -30,32 +30,47 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <div style={{ 
-      padding: '20px', 
-      borderTop: '1px solid #ccc',
+      padding: '25px', 
+      background: '#0d1117',
+      borderRadius: '8px',
+      border: '1px solid #30363d',
       display: 'flex',
       flexDirection: 'column',
-      gap: '10px'
+      gap: '15px'
     }}>
-      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
         <button onClick={handlePrevious} disabled={currentStep === 0}>
-          Previous
+          ⏮️ Previous
         </button>
-        <button onClick={onPlayPause}>
-          {isPlaying ? 'Pause' : 'Play'}
+        <button onClick={onPlayPause} style={{
+          background: isPlaying ? 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)' : 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
+          color: 'white',
+          border: 'none'
+        }}>
+          {isPlaying ? '⏸️ Pause' : '▶️ Play'}
         </button>
         <button onClick={handleNext} disabled={currentStep === totalSteps - 1}>
-          Next
+          Next ⏭️
         </button>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span>Step {currentStep + 1} of {totalSteps}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#c9d1d9' }}>
+        <span style={{ fontWeight: 600, minWidth: '120px' }}>
+          Step {currentStep + 1} of {totalSteps}
+        </span>
         <input
           type="range"
           min="0"
           max={totalSteps - 1}
           value={currentStep}
           onChange={(e) => onStepChange(parseInt(e.target.value))}
-          style={{ flex: 1 }}
+          style={{ 
+            flex: 1,
+            height: '8px',
+            borderRadius: '4px',
+            outline: 'none',
+            background: '#30363d',
+            cursor: 'pointer'
+          }}
         />
       </div>
     </div>
