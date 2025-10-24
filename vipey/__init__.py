@@ -12,14 +12,29 @@ class Vipey:
         self.custom_serializers = {}
         self.project_analysis = None
         self.file_analysis = None
+        self.captured_function_name = None
 
     def capture(self, func):
         """Decorator to capture the execution of a function."""
         def wrapper(*args, **kwargs):
+            # Store function name for filename generation
+            self.captured_function_name = func.__name__
+            
             source_code = inspect.getsource(func)
             ast_map = analyze_code(source_code)
+            
+            # Analyze time complexity
+            from .analyzer import ProjectAnalyzer
+            analyzer = ProjectAnalyzer(os.getcwd())
+            complexity_info = analyzer.analyze_time_complexity(source_code)
+            
             tracer = Tracer(ast_map=ast_map, source_code=source_code, custom_serializers=self.custom_serializers)
             self.storyboard, result = tracer.trace_function(func, *args, **kwargs)
+            
+            # Add time complexity to storyboard
+            self.storyboard['time_complexity'] = complexity_info
+            self.storyboard['function_name'] = func.__name__
+            
             return result
         return wrapper
 
@@ -65,12 +80,28 @@ class Vipey:
         if not self.storyboard and not self.project_analysis:
             raise Exception("Nothing to save. Run a captured function or analyze a project first.")
         
-        # Determine output directory based on interactive mode
+        # Determine output filename and directory based on interactive mode
         if not interactive and output_path == "visualization.html":
             # Create viz/ folder in the current directory
             output_dir = Path.cwd() / "viz"
             output_dir.mkdir(exist_ok=True)
-            output_path = str(output_dir / "visualization.html")
+            
+            # Generate filename based on what was analyzed
+            if self.captured_function_name:
+                # Use function name if a function was captured
+                filename = f"viz_{self.captured_function_name}.html"
+            elif self.file_analysis:
+                # Use file name if a file was analyzed
+                file_path = self.file_analysis.get('file', 'unknown')
+                filename = f"viz_{Path(file_path).stem}.html"
+            elif self.project_analysis:
+                # Use project name if project was analyzed
+                project_path = Path.cwd()
+                filename = f"viz_{project_path.name}.html"
+            else:
+                filename = "viz_visualization.html"
+            
+            output_path = str(output_dir / filename)
         
         # Use multi-tab visualization if we have project analysis
         if self.project_analysis or self.file_analysis:
