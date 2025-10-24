@@ -28,6 +28,111 @@ export const VisualizationPane: React.FC<VisualizationPaneProps> = ({ variable }
   return (
     <div style={{ padding: '15px' }}>
       {Object.entries(variable).map(([key, value]) => {
+        // Check if value is a special data structure
+        if (value && typeof value === 'object' && value.type) {
+          switch (value.type) {
+            case 'LinkedList':
+              return (
+                <div key={key} style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    margin: '0 0 15px 0',
+                    color: '#0d47a1',
+                    fontSize: '1.1em',
+                  }}>
+                    {key} <span style={{ 
+                      fontSize: '0.75em', 
+                      color: '#1565c0',
+                      background: '#e3f2fd',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 'normal',
+                      marginLeft: '10px',
+                    }}>
+                      Linked List
+                    </span>
+                  </h3>
+                  <LinkedListVisualizer data={value} />
+                </div>
+              );
+            
+            case 'Tree':
+            case 'BST':
+            case 'AVL':
+              return (
+                <div key={key} style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    margin: '0 0 15px 0',
+                    color: '#0d47a1',
+                    fontSize: '1.1em',
+                  }}>
+                    {key} <span style={{ 
+                      fontSize: '0.75em', 
+                      color: '#1565c0',
+                      background: '#e3f2fd',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 'normal',
+                      marginLeft: '10px',
+                    }}>
+                      {value.type}
+                    </span>
+                  </h3>
+                  <TreeVisualizer data={value} />
+                </div>
+              );
+            
+            case 'Graph':
+              return (
+                <div key={key} style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    margin: '0 0 15px 0',
+                    color: '#0d47a1',
+                    fontSize: '1.1em',
+                  }}>
+                    {key} <span style={{ 
+                      fontSize: '0.75em', 
+                      color: '#1565c0',
+                      background: '#e3f2fd',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 'normal',
+                      marginLeft: '10px',
+                    }}>
+                      Graph
+                    </span>
+                  </h3>
+                  <GraphVisualizer data={value} />
+                </div>
+              );
+            
+            case 'HashMap':
+            case 'LRUCache':
+              return (
+                <div key={key} style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    margin: '0 0 15px 0',
+                    color: '#0d47a1',
+                    fontSize: '1.1em',
+                  }}>
+                    {key} <span style={{ 
+                      fontSize: '0.75em', 
+                      color: '#1565c0',
+                      background: '#e3f2fd',
+                      padding: '4px 10px',
+                      borderRadius: '12px',
+                      fontWeight: 'normal',
+                      marginLeft: '10px',
+                    }}>
+                      {value.type}
+                    </span>
+                  </h3>
+                  <HashMapVisualizer data={value} />
+                </div>
+              );
+          }
+        }
+
+        // Default handling for arrays and other types
         const varType = Array.isArray(value) ? 'list' : typeof value;
         
         return (
