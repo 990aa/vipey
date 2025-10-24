@@ -180,19 +180,13 @@ def main():
     print("   Expected: 3 -> 2 -> 1 -> 4 -> 5")
     print()
     
-    # Save visualization in interactive mode
+    # Save visualization in static mode to test filename generation
     print("=" * 60)
-    print("Saving visualization in INTERACTIVE mode...")
-    print("This will open a dashboard at http://127.0.0.1:5000")
+    print("Saving visualization in STATIC mode...")
     print("=" * 60)
     
-    try:
-        viz.save(interactive=True)
-    except Exception as e:
-        print(f"\nInteractive mode failed: {e}")
-        print("Falling back to static mode...")
-        viz.save(interactive=False)
-        print(f"Visualization saved to: viz/visualization.html")
+    viz.save(interactive=False)
+    print(f"Visualization saved! Check the viz/ folder.")
 
 
 if __name__ == "__main__":
