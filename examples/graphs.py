@@ -12,6 +12,7 @@ Explanation:The nodes 0, 1, and 2 form a cycle. Removing any edge between them (
 """
 
 from collections import defaultdict
+from vipey import Vipey
 
 class Solution:
     def criticalConnections(self, n: int, connections: list[list[int]]) -> list[list[int]]:
