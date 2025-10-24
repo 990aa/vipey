@@ -4,11 +4,12 @@ import copy
 from typing import Any, Dict, List, Callable
 
 class Tracer:
-    def __init__(self, ast_map: Dict[int, str], source_code: str = ""):
+    def __init__(self, ast_map: Dict[int, str], source_code: str = "", custom_serializers: dict = None):
         self.ast_map = ast_map
         self.source_code = source_code
         self.storyboard = []
         self._return_value = None
+        self.custom_serializers = custom_serializers or {}
 
     def trace_function(self, func: Callable, *args, **kwargs):
         """Trace the execution of a function and capture frames."""
@@ -52,6 +53,12 @@ class Tracer:
     
     def _serialize_value(self, value):
         """Serialize a single value."""
+        # Check for custom serializers first
+        for data_type, serializer in self.custom_serializers.items():
+            if isinstance(value, data_type):
+                return serializer(value)
+        
+        # Default serialization
         if isinstance(value, (int, float, str, bool, type(None))):
             return value
         elif isinstance(value, (list, tuple)):
