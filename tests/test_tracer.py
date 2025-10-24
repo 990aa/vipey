@@ -43,6 +43,8 @@ def test_tracer_with_array():
 
 def test_visualizer_save():
     """Test that visualizer can save HTML output."""
+    import tempfile
+    
     viz = Visualizer()
     
     def simple_function():
@@ -51,11 +53,14 @@ def test_visualizer_save():
     captured = viz.capture(simple_function)
     captured()
     
-    output_path = "/tmp/test_visualization.html"
-    viz.save(output_path)
+    # Use tempfile for cross-platform compatibility
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+        output_path = f.name
     
-    assert os.path.exists(output_path)
-    
-    # Clean up
-    if os.path.exists(output_path):
-        os.remove(output_path)
+    try:
+        viz.save(output_path)
+        assert os.path.exists(output_path)
+    finally:
+        # Clean up
+        if os.path.exists(output_path):
+            os.remove(output_path)

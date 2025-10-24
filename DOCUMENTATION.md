@@ -4,12 +4,46 @@
 
 Vipey is a comprehensive Python visualization and analysis tool that combines algorithm execution tracing with advanced code intelligence and project analytics.
 
+## 🆕 What's New in v0.2.0
+
+### Time Complexity Analysis
+- **Automatic Big O Detection**: Vipey now automatically analyzes and displays time complexity for your functions
+- **Pattern Recognition**: Detects loops, recursion, sorting operations, and common algorithmic patterns
+- **Confidence Scoring**: Provides confidence levels (high/medium/low) for complexity estimates
+- **Visual Display**: Beautiful gradient cards showing Big O notation with explanations
+
+### Enhanced Output Management
+- **Smart Filename Generation**: Files now use `viz_` prefix with function/file names
+  - Function capture: `viz_function_name.html`
+  - File analysis: `viz_filename.html`
+  - Project analysis: `viz_project_name.html`
+- **Organized Output**: All static HTML files saved to `viz/` folder automatically
+
+### Interactive Dashboards
+- **Full Flask Server**: Complete interactive dashboard with Socket.IO support
+- **Multi-Tab Interface**: Function Trace, Project Analysis, and Documentation tabs
+- **Real-Time Updates**: Live status indicators and dynamic content
+- **Responsive Design**: Modern, professional UI with gradient themes
+
+### Advanced Analytics (Reports as Dictionaries)
+- **Structured Data**: All reports now return structured dictionaries instead of strings
+- **Risk Analysis**: File-level risk scoring with detailed breakdowns
+- **Stability Metrics**: Track volatile vs stable files based on git history
+- **Architectural Insights**: Call graph analysis and complexity heatmaps
+- **Plotly Visualizations**: Interactive charts for metrics, risks, and dependencies
+
+### Custom Serializers
+- **Full Support**: Custom serializers now work correctly across the entire tracing pipeline
+- **Complex Objects**: Serialize custom data structures (LinkedList, Trees, Graphs, etc.)
+- **Type Safety**: Type-specific serialization with fallback handling
+
 ---
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [New Features Guide](#new-features-guide)
 - [Core Features](#core-features)
 - [API Reference](#api-reference)
 - [Examples](#examples)
@@ -46,6 +80,129 @@ uv pip install -e ".[dev]"
 
 ---
 
+## New Features Guide
+
+### Time Complexity Analysis
+
+Vipey automatically detects and displays the time complexity of your algorithms:
+
+```python
+from vipey import Vipey
+
+viz = Vipey()
+
+@viz.capture
+def binary_search(arr, target):
+    """This will be detected as O(log n)"""
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+
+result = binary_search([1, 3, 5, 7, 9], 7)
+viz.save(interactive=False)  # Creates viz/viz_binary_search.html
+```
+
+**Supported Complexity Patterns:**
+- `O(1)` - Constant time (dictionary lookups, direct access)
+- `O(log n)` - Logarithmic time (binary search, divide-and-conquer)
+- `O(n)` - Linear time (single loops, linear scans)
+- `O(n log n)` - Linearithmic time (efficient sorting)
+- `O(n^2)` - Quadratic time (nested loops)
+- `O(n^3)` - Cubic time (triple nested loops)
+- `O(2^n)` - Exponential time (recursive algorithms)
+
+### Custom Serializers for Complex Data Structures
+
+```python
+from vipey import Vipey
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def serialize_tree(node):
+    """Custom serializer for binary tree"""
+    if not node:
+        return None
+    return {
+        'val': node.val,
+        'left': serialize_tree(node.left),
+        'right': serialize_tree(node.right)
+    }
+
+viz = Vipey()
+viz.register_serializer(TreeNode, serialize_tree)
+
+@viz.capture
+def tree_depth(root):
+    if not root:
+        return 0
+    return 1 + max(tree_depth(root.left), tree_depth(root.right))
+
+# Create a binary tree
+root = TreeNode(1, TreeNode(2), TreeNode(3))
+depth = tree_depth(root)
+viz.save(interactive=False)
+```
+
+### Interactive Mode with Flask
+
+```python
+from vipey import Vipey
+
+viz = Vipey()
+analysis = viz.analyze_project()
+
+# Start interactive server on localhost:5000
+viz.save(interactive=True)
+# Browser will automatically open with live dashboard
+```
+
+**Interactive Features:**
+- Real-time metrics display
+- Plotly interactive charts (hover, zoom, pan)
+- Live status indicators
+- Multi-tab navigation
+- Socket.IO support for future real-time updates
+
+### Advanced Project Analysis
+
+```python
+from vipey import Vipey
+
+viz = Vipey()
+result = viz.analyze_project("path/to/project")
+
+# Access structured reports
+advanced = result.get('advanced_report', {})
+nextgen = result.get('nextgen_report', {})
+
+# Risk analysis
+high_risk_files = advanced['high_risk_files']
+for file in high_risk_files[:5]:
+    print(f"{file['file']}: {file['risk_score']:.2%} risk")
+
+# Stability metrics
+stability = advanced['stability_analysis']
+print(f"Stability: {stability['stability_ratio']:.2%}")
+
+# Recommendations
+recommendations = nextgen['recommendations']['high_priority']
+for rec in recommendations:
+    print(f"- {rec}")
+```
+
+---
+
 ## Quick Start
 
 ### Function Execution Tracing
@@ -53,7 +210,7 @@ uv pip install -e ".[dev]"
 Capture and visualize algorithm execution step-by-step:
 
 ```python
-from vipey import Visualizer
+from vipey import Vipey  # Note: Visualizer is now Vipey
 
 def bubble_sort(arr):
     n = len(arr)
@@ -64,7 +221,7 @@ def bubble_sort(arr):
     return arr
 
 # Create visualizer
-viz = Visualizer()
+viz = Vipey()
 
 # Capture execution
 captured_sort = viz.capture(bubble_sort)
@@ -72,8 +229,8 @@ captured_sort = viz.capture(bubble_sort)
 # Run with data
 result = captured_sort([64, 34, 25, 12, 22, 11, 90])
 
-# Save visualization
-viz.save("visualization.html")
+# Save visualization (auto-named: viz_bubble_sort.html in viz/ folder)
+viz.save(interactive=False)
 ```
 
 ### Project Analysis
@@ -81,24 +238,23 @@ viz.save("visualization.html")
 Analyze entire projects for comprehensive metrics:
 
 ```python
-from vipey import Visualizer
+from vipey import Vipey
 
-viz = Visualizer()
+viz = Vipey()
 
 # Analyze current project
 analysis = viz.analyze_project()
 
 # Save with interactive dashboard
-viz.save("project_analysis.html", interactive=True)
+viz.save(interactive=True)  # Opens Flask server
 
-# Or save as static HTML in vipey/ folder
+# Or save as static HTML in viz/ folder
 viz.save(interactive=False)
 ```
 
 ---
 
 ## Core Features
-
 ### 1. **Function Execution Tracing**
 - Step-by-step execution capture
 - Variable state tracking
