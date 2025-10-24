@@ -797,3 +797,142 @@ class ProjectAnalyzer:
         
         return recommendations
 
+    def analyze_time_complexity(self, func_ast) -> Dict[str, Any]:
+        """
+        Analyze time complexity of a function by detecting common patterns.
+        Returns Big O notation and explanation.
+        """
+        import ast as python_ast
+        
+        complexity_info = {
+            'big_o': 'O(1)',
+            'explanation': 'Constant time - no loops or recursion detected',
+            'patterns': [],
+            'confidence': 'high'
+        }
+        
+        # Count nested loops
+        max_loop_depth = 0
+        has_recursion = False
+        has_sorting = False
+        has_dict_lookup = False
+        has_list_iteration = False
+        
+        class ComplexityVisitor(python_ast.NodeVisitor):
+            def __init__(self):
+                self.current_depth = 0
+                self.max_depth = 0
+                self.recursion_detected = False
+                self.sorting_detected = False
+                self.dict_ops = False
+                self.list_ops = False
+                self.func_name = None
+                
+            def visit_FunctionDef(self, node):
+                if self.func_name is None:
+                    self.func_name = node.name
+                self.generic_visit(node)
+                
+            def visit_For(self, node):
+                self.current_depth += 1
+                self.max_depth = max(self.max_depth, self.current_depth)
+                self.list_ops = True
+                self.generic_visit(node)
+                self.current_depth -= 1
+                
+            def visit_While(self, node):
+                self.current_depth += 1
+                self.max_depth = max(self.max_depth, self.current_depth)
+                self.generic_visit(node)
+                self.current_depth -= 1
+                
+            def visit_Call(self, node):
+                # Check for recursion
+                if isinstance(node.func, python_ast.Name):
+                    if self.func_name and node.func.id == self.func_name:
+                        self.recursion_detected = True
+                    # Check for sorting
+                    if node.func.id in ['sorted', 'sort']:
+                        self.sorting_detected = True
+                elif isinstance(node.func, python_ast.Attribute):
+                    if node.func.attr in ['sort', 'sorted']:
+                        self.sorting_detected = True
+                self.generic_visit(node)
+                
+            def visit_Subscript(self, node):
+                # Dict/list lookups
+                if isinstance(node.value, python_ast.Name):
+                    self.dict_ops = True
+                self.generic_visit(node)
+        
+        try:
+            if isinstance(func_ast, str):
+                tree = python_ast.parse(func_ast)
+            else:
+                tree = func_ast
+                
+            visitor = ComplexityVisitor()
+            visitor.visit(tree)
+            
+            max_loop_depth = visitor.max_depth
+            has_recursion = visitor.recursion_detected
+            has_sorting = visitor.sorting_detected
+            has_dict_lookup = visitor.dict_ops
+            has_list_iteration = visitor.list_ops
+            
+            # Determine complexity based on patterns
+            if has_recursion:
+                # Check for common recursive patterns
+                complexity_info['big_o'] = 'O(2^n)'
+                complexity_info['explanation'] = 'Exponential time - recursive function detected'
+                complexity_info['patterns'].append('recursion')
+                complexity_info['confidence'] = 'medium'
+                
+                # Check if it's divide and conquer (could be O(n log n) or O(log n))
+                if has_sorting or 'binary' in str(tree).lower():
+                    complexity_info['big_o'] = 'O(log n)'
+                    complexity_info['explanation'] = 'Logarithmic time - binary search/divide-and-conquer pattern'
+                    complexity_info['confidence'] = 'medium'
+            
+            elif max_loop_depth >= 3:
+                complexity_info['big_o'] = 'O(n^3)'
+                complexity_info['explanation'] = 'Cubic time - three nested loops detected'
+                complexity_info['patterns'].append(f'{max_loop_depth} nested loops')
+                complexity_info['confidence'] = 'high'
+                
+            elif max_loop_depth == 2:
+                complexity_info['big_o'] = 'O(n^2)'
+                complexity_info['explanation'] = 'Quadratic time - two nested loops detected'
+                complexity_info['patterns'].append('nested loops')
+                complexity_info['confidence'] = 'high'
+                
+            elif max_loop_depth == 1:
+                if has_sorting:
+                    complexity_info['big_o'] = 'O(n log n)'
+                    complexity_info['explanation'] = 'Linearithmic time - single loop with sorting'
+                    complexity_info['patterns'].append('sorting operation')
+                    complexity_info['confidence'] = 'high'
+                else:
+                    complexity_info['big_o'] = 'O(n)'
+                    complexity_info['explanation'] = 'Linear time - single loop iteration'
+                    complexity_info['patterns'].append('single loop')
+                    complexity_info['confidence'] = 'high'
+                    
+            elif has_sorting:
+                complexity_info['big_o'] = 'O(n log n)'
+                complexity_info['explanation'] = 'Linearithmic time - sorting operation'
+                complexity_info['patterns'].append('sorting')
+                complexity_info['confidence'] = 'high'
+                
+            elif has_dict_lookup and not has_list_iteration:
+                complexity_info['big_o'] = 'O(1)'
+                complexity_info['explanation'] = 'Constant time - dictionary/hash lookup'
+                complexity_info['patterns'].append('dict lookup')
+                complexity_info['confidence'] = 'high'
+                
+        except Exception as e:
+            complexity_info['confidence'] = 'low'
+            complexity_info['explanation'] = f'Unable to analyze: {str(e)}'
+        
+        return complexity_info
+
