@@ -22,7 +22,8 @@ export const CodePane: React.FC<CodePaneProps> = ({ code, highlightLine }) => {
           .replace(/\b(def|class|if|else|elif|for|while|return|import|from|as|try|except|finally|with|pass|break|continue|yield|async|await)\b/g, '<span style="color: #C678DD">$1</span>')
           .replace(/\b(True|False|None|self)\b/g, '<span style="color: #D19A66">$1</span>')
           .replace(/(#.*$)/g, '<span style="color: #5C6370">$1</span>')
-          .replace(/(['"])([^\1]*?)\1/g, '<span style="color: #98C379">$1$2$1</span>')
+          .replace(/"([^"]*)"/g, '<span style="color: #98C379">"$1"</span>')
+          .replace(/'([^']*)'/g, '<span style="color: #98C379">\'$1\'</span>')
           .replace(/\b(\d+)\b/g, '<span style="color: #D19A66">$1</span>');
 
         return `
