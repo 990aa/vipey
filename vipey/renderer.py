@@ -858,9 +858,11 @@ def _start_interactive_server(storyboard_data, project_data, file_data):
     @app.route('/api/documentation')
     def get_documentation():
         """API endpoint for documentation"""
+        from flask import Response
+        
         doc_path = Path(__file__).parent.parent / "DOCUMENTATION.md"
         if not doc_path.exists():
-            return '<p>Documentation not found.</p>'
+            return Response('<p>Documentation not found.</p>', mimetype='text/html')
         
         with open(doc_path, 'r', encoding='utf-8') as f:
             doc_content = f.read()
@@ -870,7 +872,7 @@ def _start_interactive_server(storyboard_data, project_data, file_data):
         else:
             html = f"<pre>{doc_content}</pre>"
         
-        return html
+        return Response(html, mimetype='text/html')
     
     # Track if browser has been opened
     browser_opened = False
