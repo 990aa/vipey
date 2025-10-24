@@ -796,5 +796,4 @@ class ProjectAnalyzer:
             recommendations.append("Code health looks good! Keep up the good practices.")
         
         return recommendations
-        
-        return '\n'.join(report)
+
