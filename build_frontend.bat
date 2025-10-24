@@ -1,5 +1,5 @@
 @echo off
-REM Build script for Vipey frontend
+REM Build script for Vipey frontend (v0.2.0)
 
 ECHO 🔨 Building Vipey Frontend...
 
@@ -22,3 +22,8 @@ cd ..
 xcopy "frontend\dist" "vipey\templates\" /s /e /i /y
 
 ECHO ✅ Build complete! Frontend assets copied to vipey/templates/
+ECHO.
+ECHO To install/update the package:
+ECHO   pip install -e .
+ECHO or
+ECHO   uv pip install -e .
