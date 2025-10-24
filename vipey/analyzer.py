@@ -550,33 +550,62 @@ class ProjectAnalyzer:
         
         return '\n'.join(report)
     
-    def generate_advanced_report(self, analysis: Dict) -> str:
+    def generate_advanced_report(self, analysis: Dict) -> Dict:
         """Generate advanced analysis report with risk analysis and insights"""
-        report = []
-        
         metrics = analysis['metrics']
         files = analysis['files']
         git = analysis.get('git_history', {})
         
-        report.append("=" * 80)
-        report.append(">>>> ADVANCED ANALYSIS")
-        report.append("=" * 80)
-        report.append("")
+        advanced_report = {
+            'code_churn': {},
+            'stability_analysis': {},
+            'high_risk_files': []
+        }
         
         # Code Churn & Stability
         if git and git.get('file_churn'):
-            report.append(">>>> CODE CHURN & STABILITY")
-            report.append("-" * 40)
-            
             churn = git['file_churn']
-            sorted_churn = sorted(churn.items(), key=lambda x: x[1]['commits'], reverse=True)[:5]
+            sorted_churn = sorted(churn.items(), key=lambda x: x[1]['commits'], reverse=True)[:10]
             
-            report.append("Most Modified Files:")
-            for file_path, stats in sorted_churn:
-                report.append(f"  {Path(file_path).name}: {stats['commits']} commits")
-            report.append("")
+            advanced_report['code_churn'] = {
+                'most_modified_files': [
+                    {
+                        'file': str(Path(file_path).name),
+                        'full_path': file_path,
+                        'commits': stats['commits'],
+                        'additions': stats.get('additions', 0),
+                        'deletions': stats.get('deletions', 0)
+                    }
+                    for file_path, stats in sorted_churn
+                ]
+            }
         
-        return '\n'.join(report)
+        # Calculate file risks
+        file_risks = []
+        for f in files:
+            risk_score = self._calculate_file_risk(f, git)
+            if risk_score > 0.3:  # Only include files with notable risk
+                file_risks.append({
+                    'file': f.get('path', ''),
+                    'risk_score': risk_score,
+                    'complexity': f.get('complexity_score', 0),
+                    'lines': f.get('total_lines', 0),
+                    'comment_ratio': f.get('comment_ratio', 0)
+                })
+        
+        file_risks.sort(key=lambda x: x['risk_score'], reverse=True)
+        advanced_report['high_risk_files'] = file_risks
+        
+        # Stability analysis
+        stable_count, volatile_count = self._analyze_stability(files, git)
+        advanced_report['stability_analysis'] = {
+            'stable_files': stable_count,
+            'volatile_files': volatile_count,
+            'total_files': len(files),
+            'stability_ratio': stable_count / len(files) if files else 0
+        }
+        
+        return advanced_report
     
     def generate_nextgen_report(self, analysis: Dict) -> str:
         """Generate next-generation analysis with predictive insights"""
