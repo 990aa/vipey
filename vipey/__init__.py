@@ -67,8 +67,8 @@ class Vipey:
         
         # Determine output directory based on interactive mode
         if not interactive and output_path == "visualization.html":
-            # Create vipey/ folder in the current directory
-            output_dir = Path.cwd() / "vipey"
+            # Create viz/ folder in the current directory
+            output_dir = Path.cwd() / "viz"
             output_dir.mkdir(exist_ok=True)
             output_path = str(output_dir / "visualization.html")
         
