@@ -798,177 +798,98 @@ def _generate_project_analysis_html(project_data, file_data):
 
 
 def _start_interactive_server(storyboard_data, project_data, file_data):
-    """Start Flask server for interactive visualization"""
+    """Start Flask server for interactive React visualization"""
     if not HAS_FLASK:
-        print("Flask not available. Install it for interactive mode: pip install flask flask-socketio")
+        print("Flask not available. Install it for interactive mode: pip install flask")
         return
     
-    try:
-        from flask_socketio import SocketIO, emit
-        HAS_SOCKETIO = True
-    except ImportError:
-        HAS_SOCKETIO = False
+    from flask import Flask, send_from_directory, jsonify
     
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=None)
     app.config['SECRET_KEY'] = 'vipey-secret-key'
     
-    if HAS_SOCKETIO:
-        socketio = SocketIO(app, cors_allowed_origins="*")
+    # Get template directory
+    template_dir = Path(__file__).parent / 'templates'
+    dist_dir = template_dir / 'dist'
     
-    # Generate HTML content for tabs
-    project_html = _generate_project_analysis_html(project_data, file_data)
-    
-    # Read documentation
-    doc_path = Path(__file__).parent.parent / "DOCUMENTATION.md"
-    documentation_html = ""
-    if doc_path.exists():
-        with open(doc_path, 'r', encoding='utf-8') as f:
-            doc_content = f.read()
-        if HAS_MARKDOWN:
-            documentation_html = markdown.markdown(doc_content, extensions=['fenced_code', 'tables', 'toc'])
-        else:
-            documentation_html = f"<pre>{doc_content}</pre>"
+    # Store data globally for API endpoints
+    app.config['STORYBOARD_DATA'] = storyboard_data
+    app.config['PROJECT_DATA'] = project_data
+    app.config['FILE_DATA'] = file_data
     
     @app.route('/')
     def index():
-        """Render interactive multi-tab interface"""
-        
-        # Get time complexity if available
-        complexity_html = ""
-        if storyboard_data and 'time_complexity' in storyboard_data:
-            complexity = storyboard_data['time_complexity']
-            big_o = complexity.get('big_o', 'Unknown')
-            explanation = complexity.get('explanation', '')
-            patterns = complexity.get('patterns', [])
-            confidence = complexity.get('confidence', 'unknown')
-            
-            pattern_badges = ' '.join([f'<span class="badge badge-info">{p}</span>' for p in patterns])
-            confidence_color = {'high': 'success', 'medium': 'warning', 'low': 'danger'}.get(confidence, 'info')
-            
-            complexity_html = f'''
-            <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <h3 style="color: white;">⏱️ Time Complexity Analysis</h3>
-                <div style="font-size: 2em; font-weight: bold; margin: 15px 0;">{big_o}</div>
-                <p style="opacity: 0.9;">{explanation}</p>
-                {f'<div style="margin-top: 10px;">Patterns: {pattern_badges}</div>' if patterns else ''}
-                <div style="margin-top: 10px; opacity: 0.8;">
-                    <span class="badge badge-{confidence_color}">Confidence: {confidence}</span>
-                </div>
-            </div>
-            '''
-        
-        html = f'''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Vipey - Interactive Dashboard</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f7fa; }}
-        .container {{ max-width: 1400px; margin: 0 auto; padding: 20px; }}
-        header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
-        .tabs {{ display: flex; gap: 10px; margin: 20px 0; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
-        .tab {{ padding: 12px 24px; cursor: pointer; border-radius: 6px; transition: all 0.3s; font-weight: 500; }}
-        .tab:hover {{ background: #f0f0f0; }}
-        .tab.active {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }}
-        .tab-content {{ display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
-        .tab-content.active {{ display: block; }}
-        .metric-card {{ background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
-        .metric-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }}
-        .metric-item {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }}
-        .metric-label {{ opacity: 0.9; font-size: 0.9em; margin-bottom: 5px; }}
-        .metric-value {{ font-size: 2em; font-weight: bold; }}
-        .badge {{ display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: 500; margin: 2px; }}
-        .badge-info {{ background: #3498db; color: white; }}
-        .badge-success {{ background: #2ecc71; color: white; }}
-        .badge-warning {{ background: #f39c12; color: white; }}
-        .badge-danger {{ background: #e74c3c; color: white; }}
-        table {{ width: 100%; border-collapse: collapse; margin-top: 15px; }}
-        th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #eee; }}
-        th {{ background: #f8f9fa; font-weight: 600; }}
-        tr:hover {{ background: #f8f9fa; }}
-        code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }}
-        .status {{ display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }}
-        .status-live {{ background: #2ecc71; animation: pulse 2s infinite; }}
-        @keyframes pulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.5; }} }}
-        h2 {{ color: #2c3e50; margin-bottom: 20px; }}
-        h3 {{ color: #34495e; margin: 20px 0 10px 0; }}
-    </style>
-</head>
-<body>
-    <header>
-        <h1>🎯 Vipey - Interactive Code Intelligence</h1>
-        <p><span class="status status-live"></span> Live Dashboard</p>
-    </header>
+        """Serve the React app"""
+        return send_from_directory(dist_dir, 'index.html')
     
-    <div class="container">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('trace')">Function Trace</div>
-            <div class="tab" onclick="switchTab('analysis')">Project Analysis</div>
-            <div class="tab" onclick="switchTab('docs')">Documentation</div>
-        </div>
-        
-        <div id="trace-content" class="tab-content active">
-            <h2>Function Execution Trace</h2>
-            {complexity_html}
-            <div class="metric-card">
-                <h3>Execution Summary</h3>
-                <p><strong>Function:</strong> <code>{storyboard_data.get('function_name', 'unknown') if storyboard_data else 'N/A'}</code></p>
-                <p><strong>Frames captured:</strong> {len(storyboard_data.get('frames', [])) if storyboard_data else 0}</p>
-                <p><strong>Return value:</strong> <code>{storyboard_data.get('return_value', 'N/A') if storyboard_data else 'N/A'}</code></p>
-            </div>
-        </div>
-        
-        <div id="analysis-content" class="tab-content">
-            {project_html}
-        </div>
-        
-        <div id="docs-content" class="tab-content">
-            <div class="doc-content">
-                {documentation_html}
-            </div>
-        </div>
-    </div>
+    @app.route('/assets/<path:path>')
+    def assets(path):
+        """Serve static assets"""
+        return send_from_directory(dist_dir / 'assets', path)
     
-    <script>
-        function switchTab(tabName) {{
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {{
-                content.classList.remove('active');
-            }});
-            
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab').forEach(tab => {{
-                tab.classList.remove('active');
-            }});
-            
-            // Show selected tab content
-            document.getElementById(tabName + '-content').classList.add('active');
-            
-            // Add active class to selected tab
-            event.target.classList.add('active');
-        }}
-    </script>
-    {"<script src='https://cdn.socket.io/4.5.4/socket.io.min.js'></script>" if HAS_SOCKETIO else ""}
-</body>
-</html>
-        '''
+    @app.route('/api/storyboard')
+    def get_storyboard():
+        """API endpoint for storyboard data"""
+        data = app.config.get('STORYBOARD_DATA', {})
+        if not data:
+            return jsonify({
+                'frames': [],
+                'return_value': None,
+                'source_code': '# No storyboard data available',
+                'function_name': 'N/A'
+            })
+        return jsonify(data)
+    
+    @app.route('/api/project')
+    def get_project():
+        """API endpoint for project analysis data"""
+        project = app.config.get('PROJECT_DATA')
+        file_info = app.config.get('FILE_DATA')
+        
+        if not project and not file_info:
+            return '<p>No analysis data available.</p>'
+        
+        # Generate HTML for project analysis
+        html = _generate_project_analysis_html(project, file_info)
+        return html
+    
+    @app.route('/api/documentation')
+    def get_documentation():
+        """API endpoint for documentation"""
+        doc_path = Path(__file__).parent.parent / "DOCUMENTATION.md"
+        if not doc_path.exists():
+            return '<p>Documentation not found.</p>'
+        
+        with open(doc_path, 'r', encoding='utf-8') as f:
+            doc_content = f.read()
+        
+        if HAS_MARKDOWN:
+            html = markdown.markdown(doc_content, extensions=['fenced_code', 'tables', 'toc'])
+        else:
+            html = f"<pre>{doc_content}</pre>"
+        
         return html
     
     def open_browser():
         time.sleep(1.5)
         webbrowser.open('http://127.0.0.1:5000')
     
+    # Start browser in separate thread
     threading.Thread(target=open_browser, daemon=True).start()
     
-    print("\n" + "="*60)
-    print("🚀 Starting interactive server at: http://127.0.0.1:5000")
-    print("="*60 + "\n")
+    print("\n" + "="*70)
+    print("🚀 Vipey Interactive Server")
+    print("="*70)
+    print()
+    print("  ➜  Local:   \033[1;36mhttp://127.0.0.1:5000\033[0m")
+    print()
+    print("  Press \033[1;31mCtrl+C\033[0m to stop the server")
+    print("="*70 + "\n")
     
-    if HAS_SOCKETIO:
-        socketio.run(app, debug=False, port=5000, allow_unsafe_werkzeug=True)
-    else:
-        app.run(debug=False, port=5000)
+    try:
+        app.run(debug=False, port=5000, use_reloader=False)
+    except KeyboardInterrupt:
+        print("\n" + "="*70)
+        print("✋ Server stopped by user")
+        print("="*70)
 

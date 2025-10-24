@@ -113,7 +113,14 @@ class Vipey:
                 interactive=interactive
             )
         else:
-            save_visualization(self.storyboard, output_path)
+            # Even for simple function traces, use multi-tab visualization
+            save_multi_tab_visualization(
+                storyboard_data=self.storyboard,
+                project_data=None,
+                file_data=None,
+                output_path=output_path,
+                interactive=interactive
+            )
 
     def register_serializer(self, data_type, serializer_func):
         """Register a custom serializer for a data type."""
